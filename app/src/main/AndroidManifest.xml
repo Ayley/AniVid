@@ -13,15 +13,15 @@
         android:theme="@style/Theme.AniCloud">
         <activity
             android:name=".ui.stream.StreamView"
-            android:label="@string/title_activity_stream_view"
+            android:label="AniVid"
             android:theme="@style/Theme.AniCloud.NoActionBar"></activity>
         <activity
             android:name=".ui.videoplayer.StreamPlayer"
             android:screenOrientation="userLandscape"
-            android:label="AniCloud" />
+            android:label="AniVid" />
         <activity
             android:name=".activities.SplashScreenActivity"
-            android:label="@string/app_name"
+            android:label="AniVid"
             android:noHistory="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +31,7 @@
         </activity>
         <activity
             android:name=".activities.MainActivity"
-            android:label="@string/app_name">
+            android:label="AniVid">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,5 +39,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
