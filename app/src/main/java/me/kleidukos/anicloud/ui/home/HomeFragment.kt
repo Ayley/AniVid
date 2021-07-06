@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.isEmpty
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -16,6 +17,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.kleidukos.anicloud.models.DisplayStream
 import me.kleidukos.anicloud.R
+import me.kleidukos.anicloud.activities.MainActivity
+import me.kleidukos.anicloud.components.GenreSelector
 import me.kleidukos.anicloud.components.RandomSeries
 import me.kleidukos.anicloud.components.SeriesContainer
 import me.kleidukos.anicloud.datachannel.DataChannelManager
@@ -24,16 +27,18 @@ import me.kleidukos.anicloud.enums.Genre
 import me.kleidukos.anicloud.models.DisplayStreamContainer
 import java.lang.Exception
 
-class HomeFragment : Fragment(), IDataChannel {
+class HomeFragment : Fragment() {
 
     private lateinit var containerLayout: LinearLayout
     private lateinit var viewGroup: ViewGroup
 
-    private var displayStreamContainer: DisplayStreamContainer? = null
-
     private lateinit var viewModel: HomeViewModel
 
-    private var randomSeries: RandomSeries? = null
+    private lateinit var randomSeries: RandomSeries
+    private lateinit var genreSelector: GenreSelector
+
+    private var watchlist: MutableList<DisplayStream> = mutableListOf()
+    private var genres: MutableList<Genre> = mutableListOf()
 
     override fun onCreateView(inflater: LayoutInflater,container: ViewGroup?,savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -51,77 +56,121 @@ class HomeFragment : Fragment(), IDataChannel {
     }
 
     override fun onResume() {
+        Log.d("Fragment_Home", "onResume")
+
+        if(!MainActivity.isStreamContainerInit()){
+            Log.d("Fragment_Home", "Skip onResume")
+            super.onResume()
+            return
+        }
+
+        loadWatchlist()
+
+        loadGenres()
+
+        addRandomSeries()
+
+        addWatchlist()
+
+        addGenreChooser()
+
+        for (genre in genres){
+            addGenre(genre, true)
+        }
+
         super.onResume()
-        try {
-            displayStreamContainer = DataChannelManager.dataChannelStorage("Main") as DisplayStreamContainer
-        }catch (e: Exception){
-            //Nothing
-        }
-
-        if(displayStreamContainer != null && containerLayout.size == 0){
-            loadRandomSeries()
-
-            loadGenres()
-        }
     }
 
     override fun onPause() {
-        super.onPause()
-        randomSeries?.stop()
-        randomSeries = null
-        containerLayout.removeAllViews()
-    }
+        Log.d("Fragment_Home", "onPause")
 
-    fun loadRandomSeries() {
-        activity?.runOnUiThread {
-            if(randomSeries == null){
-                randomSeries = RandomSeries(viewGroup.context, displayStreamContainer?.allSeries!!)
-
-                containerLayout.addView(randomSeries)
-            }
-        }
-    }
-
-    fun loadGenres() {
-        Thread {
-            this.activity?.runOnUiThread() {
-                loadGenre(viewGroup.context, Genre.POPULAR, Genre.POPULAR.genreName)
-
-                loadGenre(viewGroup.context, Genre.NEW, Genre.NEW.genreName)
-
-                loadGenre(viewGroup.context, Genre.DRAMA, "Genre: ${Genre.DRAMA.genreName}")
-            }
-        }.start()
-    }
-
-    fun loadGenre(context: Context, genre: Genre, title: String) {
-        val streams: List<DisplayStream> = displayStreamContainer?.genreMap?.get(genre)!!
-
-        if (streams.size > 30) {
-            addGenre(context, streams.subList(0, 30), title)
+        if(containerLayout.isEmpty()){
+            Log.d("Fragment_Home", "Skip onPause")
+            super.onPause()
             return
         }
-        addGenre(context, streams, title)
+
+        randomSeries.stop()
+
+        containerLayout.removeAllViews()
+
+        super.onPause()
     }
 
-    private fun addGenre(context: Context, displayStreams: List<DisplayStream>, title: String) {
-        val view = SeriesContainer(context, displayStreams, title)
+    //Manage variables
+    private fun loadWatchlist(){
+        Log.d("Fragment_Home", "Load Watchlist")
+
+        val dbWatchlist = MainActivity.database().watchlistDao()
+
+        watchlist.clear()
+
+        for (stream in dbWatchlist.getWatchlist()){
+            val displayStream = DisplayStream(stream.name, stream.cover, stream.url)
+            watchlist.add(displayStream)
+        }
+    }
+
+    private fun loadGenres(){
+        Log.d("Fragment_Home", "Load Genres")
+
+        val dbGenres = MainActivity.database().genresDao()
+
+        genres.clear()
+
+        for (genre in dbGenres.getGenres()){
+            genres.add(genre.genre)
+        }
+    }
+
+    //Load views
+    private fun addRandomSeries(){
+        Log.d("Fragment_Home", "Add random series")
+
+        val allStreams = MainActivity.streamContainer().allSeries
+
+        randomSeries = RandomSeries(containerLayout.context, allStreams)
+
+        containerLayout.addView(randomSeries)
+
+        randomSeries.start()
+    }
+
+    private fun addWatchlist(){
+        Log.d("Fragment_Home", "Add watchlist")
+
+        if(watchlist.isEmpty()){
+            return
+        }
+
+        val view = SeriesContainer(containerLayout.context,containerLayout, null, null, watchlist.asReversed(), "Watchlist", false)
 
         containerLayout.addView(view)
     }
 
-    override fun <T> onDataReceived(data: T) {
-        if (data is DisplayStreamContainer) {
-            Log.d("Home", "Loading Animes")
+    fun addGenre(genre: Genre, beforeLast: Boolean){
+        Log.d("Fragment_Home", "Add genre: ${genre.genreName}")
 
-            displayStreamContainer = data
+        val genreStreams = if(MainActivity.streamContainer().genreMap?.get(genre)?.size!! > 30){
+            MainActivity.streamContainer().genreMap?.get(genre)?.subList(0, 30)
+        }else{
+            MainActivity.streamContainer().genreMap?.get(genre)
+        }
 
-            loadRandomSeries()
+        val view = SeriesContainer(containerLayout.context, containerLayout, genre, genreSelector, genreStreams!!, "Genre: ${genre.genreName}", true)
 
-            loadGenres()
+        val size = containerLayout.size
 
-            Log.d("Home", "Loaded")
+        if(beforeLast){
+            containerLayout.addView(view, size -1)
+        }else{
+            containerLayout.addView(view)
         }
     }
 
+    private fun addGenreChooser(){
+        genreSelector = GenreSelector(containerLayout.context, this)
+
+        containerLayout.addView(genreSelector)
+    }
 }

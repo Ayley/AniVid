@@ -7,25 +7,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import me.kleidukos.anicloud.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.kleidukos.anicloud.enums.Language
-import me.kleidukos.anicloud.models.DisplayStream
 import me.kleidukos.anicloud.models.Episode
 import me.kleidukos.anicloud.models.Season
 import me.kleidukos.anicloud.models.Stream
-import me.kleidukos.anicloud.scraping.SeasonFetcher
-import me.kleidukos.anicloud.scraping.StreamFetcher
-import me.kleidukos.anicloud.ui.stream.StreamView
 import me.kleidukos.anicloud.ui.videoplayer.StreamPlayer
 
 class SeasonAdapterRecycler(private val context: Context, private val season: Season,private val  stream: Stream) :
@@ -43,7 +37,7 @@ class SeasonAdapterRecycler(private val context: Context, private val season: Se
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val service = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-        val view = service.inflate(R.layout.season_listitem, parent, false)
+        val view = service.inflate(R.layout.season_list_item, parent, false)
 
         return Holder(view)
     }

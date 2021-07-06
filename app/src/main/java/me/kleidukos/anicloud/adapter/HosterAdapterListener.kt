@@ -13,7 +13,7 @@ class HosterAdapterListener(private val streamPlayer: StreamPlayer): AdapterView
         val hoster = streamPlayer.season.episodes[streamPlayer.episode].hoster[pos]
 
         val id = if(hoster.streams.containsKey(streamPlayer.language)){
-            hoster.streams.get(streamPlayer.language)
+            hoster.streams?.get(streamPlayer.language)
         }else{
             streamPlayer.finish()
         }
@@ -26,5 +26,6 @@ class HosterAdapterListener(private val streamPlayer: StreamPlayer): AdapterView
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
+        //Nothing
     }
 }

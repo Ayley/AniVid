@@ -14,15 +14,16 @@
 - A search that contains all existing animes on AniCloud without exception
 - When you log in with your AniCloud account, episodes seen are marked green
 - A striking design which is being further developed for easy operation
+- A watchlist to never forget what you saw last
+- Update notification with the download of the new version, ready to install
 
 # Planned features
 
-- Update notification with the download of the new version, ready to install
-- A watchlist to never forget what you saw last
-- A search in which you can display all animes of a genre
 - Performance improvement for a faster start of the app
-- Add settings such as switching the autoplay on and off and logging out the account
+- User can choose an external videoplayer
+- A search in which you can display all animes of a genre
 - Patching some bugs
+- Add settings such as switching the autoplay on and off and logging out the account
 
 # Known bugs
 

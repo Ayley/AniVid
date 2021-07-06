@@ -3,22 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/container_name"
-        android:layout_width="wrap_content"
-        android:layout_height="25dp"
-        android:textSize="18sp"
-        android:layout_marginLeft="12dp"
-        android:textStyle="bold"
-        android:gravity="left"
-        android:textColor="@color/white"
-        android:text=""/>
+    <RelativeLayout
+        android:id="@+id/text_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/container_name"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:textSize="20sp"
+            android:layout_marginLeft="10dp"
+            android:textStyle="bold"
+            android:gravity="left"
+            android:textColor="@color/white"
+            android:text=""/>
+
+        <ImageButton
+            android:id="@+id/container_remove"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/remove_floating_button"/>
+    </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/container_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/container_name"
+        android:layout_below="@+id/text_container"
         android:orientation="horizontal"/>
 
 </RelativeLayout>

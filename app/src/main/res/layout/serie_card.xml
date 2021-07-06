@@ -4,9 +4,8 @@
     android:layout_height="205dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/shape"
-    android:layout_marginLeft="7dp"
+    android:layout_marginLeft="5dp"
     android:layout_marginBottom="5dp">
-
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

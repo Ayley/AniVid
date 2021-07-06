@@ -5,29 +5,39 @@
     android:layout_height="match_parent"
     tools:context=".ui.search.SearchFragment">
 
-    <AutoCompleteTextView
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"
-        android:id="@+id/searchbox"
+    <RelativeLayout
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginTop="3dp"
+        android:id="@+id/search_container"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:hint="Search"
-        android:gravity="center"
-        android:layout_toLeftOf="@id/search"
-        />
-    <ImageView
-        android:id="@+id/search"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/search_symbol"
-        android:theme="@style/Theme.Design"
-        android:layout_margin="5dp"
-        />
+        android:background="@drawable/shape">
+        <AutoCompleteTextView
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:id="@+id/searchbox"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="Search"
+            android:gravity="center"
+            android:layout_toLeftOf="@id/search"
+            />
+        <ImageView
+            android:id="@+id/search"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/search_symbol"
+            android:theme="@style/Theme.Design"
+            android:layout_margin="5dp"
+            />
+    </RelativeLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/searchbox"/>
+        android:layout_below="@id/search_container"/>
 </RelativeLayout>

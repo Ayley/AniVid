@@ -35,9 +35,22 @@ class MainActivity : AppCompatActivity(), IDataChannel {
 
     private lateinit var dataChannelManager: DataChannelManager
 
-    private lateinit var database: AppDatabase
+    companion object{
+        private lateinit var displayStreamContainer: DisplayStreamContainer
+        private lateinit var database: AppDatabase
 
-    private var displayStreamContainer: DisplayStreamContainer? = null
+        fun database(): AppDatabase{
+            return this.database
+        }
+
+        fun streamContainer(): DisplayStreamContainer{
+            return this.displayStreamContainer
+        }
+
+        fun isStreamContainerInit(): Boolean{
+            return this::displayStreamContainer.isInitialized
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,8 +62,6 @@ class MainActivity : AppCompatActivity(), IDataChannel {
         buildPolicy()
 
         loadNavigation()
-
-        loadChannels()
 
         val intent = Intent(applicationContext, SplashScreenActivity::class.java)
 
@@ -86,15 +97,6 @@ class MainActivity : AppCompatActivity(), IDataChannel {
         navView.setupWithNavController(navController)
     }
 
-    private fun loadChannels() {
-        val fragments =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
-
-        val home = fragments.childFragmentManager.fragments[0]
-
-        dataChannelManager.addChannel("Home", home as IDataChannel)
-    }
-
     private fun buildPolicy() {
         val SDK_INT = Build.VERSION.SDK_INT
         if (SDK_INT > 8) {
@@ -105,9 +107,10 @@ class MainActivity : AppCompatActivity(), IDataChannel {
     }
 
     override fun <T> onDataReceived(data: T) {
+        Log.d("Activity_Main", "Receive data")
         if (data is DisplayStreamContainer) {
             displayStreamContainer = data
-            DataChannelManager.sendData("Home", data)
+            Log.d("Activity_Main", "Set container")
         }
         if(data is String){
             val user = User(0, data)

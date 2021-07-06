@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -17,10 +18,7 @@ import dev.inmo.krontab.buildSchedule
 import dev.inmo.krontab.builder.buildSchedule
 import dev.inmo.krontab.doInfinity
 import dev.inmo.krontab.doWhile
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import me.kleidukos.anicloud.R
 import me.kleidukos.anicloud.adapter.StreamAdapterRecycler
 import me.kleidukos.anicloud.models.DisplayStream
@@ -51,38 +49,18 @@ class RandomSeries: LinearLayout {
         containerList = findViewById(R.id.container_list)
 
         val textView = findViewById<TextView>(R.id.container_name)
+        val removeButton = findViewById<ImageButton>(R.id.container_remove)
 
         textView.visibility = View.GONE
+        removeButton.visibility = View.GONE
 
         setTopMargin(context)
 
         this.displayStreams = displayStreams
 
-        val scheduler = buildSchedule{
-            seconds{
-                from (0) every 20
-            }
-        }
-
         Log.d("Home", "Add Schedule")
 
         loadRandomSeries()
-
-        GlobalScope.launch(Dispatchers.Main) {
-            scheduler.doWhile {
-                if(!run){
-                    Log.d("Home", "Remove Schedule")
-                    false
-                }else {
-
-                    Log.d("Home", "Schedule")
-
-                    loadRandomSeries()
-
-                    true
-                }
-            }
-        }
 
         containerList.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
     }
@@ -107,12 +85,39 @@ class RandomSeries: LinearLayout {
         }
         containerList.removeAllViews()
 
-        val adapterRecycler = StreamAdapterRecycler(context, randomSeries, 18)
+        val adapterRecycler = StreamAdapterRecycler(context, randomSeries)
         containerList.adapter = adapterRecycler
     }
 
     fun rand(from: Int, to: Int) : Int {
         return Random.nextInt(to - from) + from
+    }
+
+    fun start(){
+        run = true
+        val scheduler = buildSchedule{
+            seconds{
+                from (0) every 20
+            }
+        }
+
+        GlobalScope.launch(Dispatchers.Unconfined) {
+            withContext(Dispatchers.Main) {
+                scheduler.doWhile {
+                    if (!run) {
+                        Log.d("Home", "Remove Schedule")
+                        false
+                    } else {
+
+                        Log.d("Home", "Schedule")
+
+                        loadRandomSeries()
+
+                        true
+                    }
+                }
+            }
+        }
     }
 
     fun stop() {

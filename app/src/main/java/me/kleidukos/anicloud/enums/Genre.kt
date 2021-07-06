@@ -39,7 +39,6 @@ enum class Genre(val genreName: String, val url: String): Serializable {
     YURI("Yuri", "genre/yuri"),
     EXCESSIVE_DISPLAY_OF_VIOLENCE("Übermäßige Gewaltdarstellung", "genre/uebermaessige-gewaltdarstellung"),
 
-
     ALL("Alle Animes", "animes"),
     NEW("Neue Animes", "neu"),
     POPULAR("Beliebte Animes", "beliebte-animes")
