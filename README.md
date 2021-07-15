@@ -16,17 +16,15 @@
 - A striking design which is being further developed for easy operation
 - A watchlist to never forget what you saw last
 - Update notification with the download of the new version, ready to install
+- User can choose an external videoplayer
+- Performance improvement for a faster start of the app (From the first start, the app will update all animes after seven days)
 
 # Planned features
 
-- Performance improvement for a faster start of the app
-- User can choose an external videoplayer
 - A search in which you can display all animes of a genre
-- Patching some bugs
 - Add settings such as switching the autoplay on and off and logging out the account
+- Patching some bugs
 
 # Known bugs
 
 - App crashes if the selected hoster could not be loaded
-- App crashes when a timeout occurs while loading the series
-- The UI elements appear sluggish in Video Player

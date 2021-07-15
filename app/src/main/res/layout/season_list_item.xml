@@ -2,17 +2,31 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="70dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/shape"
     android:layout_marginBottom="5dp">
 
     <RelativeLayout
         android:id="@+id/episode"
-        android:paddingTop="3dp"
-        android:paddingLeft="7dp"
         android:paddingRight="7dp"
-        android:paddingBottom="3dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/episode_card"
+            android:layout_width="95dp"
+            android:layout_height="70dp"
+            android:background="@color/background2"
+            app:cardCornerRadius="8dp">
+
+            <ImageView
+                android:id="@+id/episode_thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/background2"
+                android:scaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
+
         <TextView
             android:id="@+id/episode_title"
             android:layout_width="match_parent"
@@ -22,7 +36,10 @@
             android:textSize="18sp"
             android:gravity="center|left"
             android:textColor="@color/white"
-            android:maxLines="1"/>
+            android:maxLines="1"
+            android:layout_marginLeft="4dp"
+
+            android:layout_toRightOf="@id/episode_card"/>
 
         <TextView
             android:id="@+id/episode_description"
@@ -33,15 +50,16 @@
             android:textSize="16sp"
             android:gravity="top|left"
             android:textColor="@color/white"
-            android:maxLines="2"/>
+            android:maxLines="2"
+            android:layout_marginLeft="4dp"
+            android:layout_toRightOf="@id/episode_card"/>
     </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/language_selection"
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:visibility="gone"
-        android:background="@color/head_background">
+        android:visibility="gone">
         <ImageButton
             android:id="@+id/language_german"
             android:visibility="gone"

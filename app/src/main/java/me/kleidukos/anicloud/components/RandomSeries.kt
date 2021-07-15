@@ -1,7 +1,6 @@
 package me.kleidukos.anicloud.components
 
 import android.content.Context
-import android.os.Parcelable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,27 +9,21 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.core.view.doOnDetach
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import dev.inmo.krontab.KronScheduler
-import dev.inmo.krontab.buildSchedule
 import dev.inmo.krontab.builder.buildSchedule
-import dev.inmo.krontab.doInfinity
 import dev.inmo.krontab.doWhile
 import kotlinx.coroutines.*
 import me.kleidukos.anicloud.R
 import me.kleidukos.anicloud.adapter.StreamAdapterRecycler
-import me.kleidukos.anicloud.models.DisplayStream
-import java.util.Date.from
+import me.kleidukos.anicloud.room.series.RoomDisplayStream
 import kotlin.random.Random
-import kotlin.time.Duration.Companion.seconds
 
 class RandomSeries: LinearLayout {
 
     private val containerList: RecyclerView
 
-    private lateinit var displayStreams: List<DisplayStream>
+    private lateinit var displayStreams: List<RoomDisplayStream>
 
     private var run: Boolean = true
 
@@ -42,7 +35,7 @@ class RandomSeries: LinearLayout {
         containerList = findViewById(R.id.container_list)
     }
 
-    constructor(context: Context, displayStreams: List<DisplayStream>): super(context){
+    constructor(context: Context, displayStreams: List<RoomDisplayStream>): super(context){
         val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         inflater.inflate(R.layout.series_container, this)
@@ -74,7 +67,7 @@ class RandomSeries: LinearLayout {
     }
 
     private fun loadRandomSeries(){
-        val randomSeries = mutableListOf<DisplayStream>()
+        val randomSeries = mutableListOf<RoomDisplayStream>()
 
         for (displayStream in displayStreams){
             if(randomSeries.size == 3){

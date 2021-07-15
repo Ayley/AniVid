@@ -1,7 +1,6 @@
 package me.kleidukos.anicloud.components
 
 import android.content.Context
-import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.ArrayAdapter
@@ -9,10 +8,9 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Spinner
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.activities.MainActivity
-import me.kleidukos.anicloud.enums.Genre
-import me.kleidukos.anicloud.room.RoomDisplayStream
-import me.kleidukos.anicloud.room.RoomGenre
+import me.kleidukos.anicloud.ui.main.MainActivity
+import me.kleidukos.anicloud.models.anicloud.Genre
+import me.kleidukos.anicloud.room.savedgenres.RoomGenre
 import me.kleidukos.anicloud.ui.home.HomeFragment
 
 class GenreSelector : LinearLayout {
@@ -47,17 +45,12 @@ class GenreSelector : LinearLayout {
 
     //Load components
     fun loadGenreSpinner() {
-        genres.background.setColorFilter(
-            resources.getColor(R.color.head_background),
-            PorterDuff.Mode.OVERLAY
-        )
-
         val genreNames: MutableList<String> = mutableListOf()
 
         val roomGenres = MainActivity.database().genresDao().getGenres()
 
         for (genre in Genre.values()) {
-            if (genre == Genre.ALL || genre == Genre.POPULAR || genre == Genre.MAGICAL_GIRL || roomGenres.any {it.genre.genreName.equals(genre.genreName,true)}) {
+            if (genre == Genre.ALL || genre == Genre.POPULAR || genre == Genre.NEW || roomGenres.any {it.genre.genreName.equals(genre.genreName,true)}) {
                 continue
             }
             genreNames.add(genre.genreName)
@@ -85,7 +78,7 @@ class GenreSelector : LinearLayout {
             MainActivity.database().genresDao().insertGenre(roomGenre)
 
             if (genre != Genre.ALL) {
-                homeFragment.addGenre(genre, true)
+                homeFragment.addGenre(genre)
             }
 
             loadGenreSpinner()

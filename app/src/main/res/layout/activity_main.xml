@@ -4,34 +4,67 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background2">
 
-    <include
+    <LinearLayout
         android:id="@+id/app_bar"
-        layout="@layout/app_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="60dp"
+        android:background="@color/two_white"
+        android:orientation="horizontal">
+        <TextView
+        android:id="@+id/app_title"
+        android:layout_width="130dp"
+        android:layout_height="match_parent"
+        android:text="@string/app_name"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:gravity="center|left"
+        android:textAlignment="gravity"
+            android:textStyle="bold"/>
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <EditText
+            android:id="@+id/searchbox"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:visibility="gone"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="200"
+            android:backgroundTint="@color/white"
+            android:gravity="center_horizontal|center_vertical"
+            android:hint="Search"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white" />
+        <ImageButton
+            android:id="@+id/search_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/search_symbol"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="right|center_vertical"
+            android:background="@android:color/transparent" />
+        <ImageButton
+            android:id="@+id/menu_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/menu_button"
+            android:layout_marginRight="5dp"
+            android:layout_gravity="right|center_vertical"
+            android:background="@android:color/transparent"/>
+    </LinearLayout>
 
     <fragment
-        android:id="@+id/nav_host_fragment_activity_main"
+        android:id="@+id/fragment_container"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/nav_view"
         android:layout_below="@id/app_bar"
         app:defaultNavHost="true"
+        android:tag="home"
         app:navGraph="@navigation/mobile_navigation" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/head_background"
-        app:itemIconTint="@drawable/selector"
-        app:labelVisibilityMode="unlabeled"
-        android:layout_alignParentBottom="true"
-        app:menu="@menu/bottom_nav_menu" />
-
-
-
 </RelativeLayout>

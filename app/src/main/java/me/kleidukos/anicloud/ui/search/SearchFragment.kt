@@ -1,30 +1,28 @@
 package me.kleidukos.anicloud.ui.search
 
+import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
-import android.widget.ImageView
+import android.view.inputmethod.InputMethodManager
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.activities.MainActivity
+import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.adapter.StreamAdapterRecycler
-import me.kleidukos.anicloud.models.DisplayStreamContainer
+
 
 class SearchFragment : Fragment() {
 
-    private lateinit var searchBox: AutoCompleteTextView
-    private lateinit var search: ImageView
+    private lateinit var searchBox: EditText
     private lateinit var searchList: RecyclerView
 
     private lateinit var root: View
-
-    private lateinit var streamContainer: DisplayStreamContainer
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,54 +31,61 @@ class SearchFragment : Fragment() {
     ): View? {
         root = inflater.inflate(R.layout.fragment_search, container, false)
 
-        searchBox = root.findViewById(R.id.searchbox)
-        search = root.findViewById(R.id.search)
+        setupView()
+
         searchList = root.findViewById(R.id.search_list)
         searchList.layoutManager = GridLayoutManager(requireContext(), 3)
 
-        if (!MainActivity.isStreamContainerInit()) {
-            Log.d("Fragment_Search", "Skip onCreateView")
-            return root
-        }
-
-        if (!this::streamContainer.isInitialized) {
-            streamContainer = MainActivity.streamContainer()
-            loadSearchBox()
-            setSearchOnClick()
-        }
+        setSearchOnClick()
 
         return root
     }
 
-    //Load Components
-    private fun loadSearchBox() {
-        val streamList = mutableListOf<String>()
-
-        for (displayStream in streamContainer.allSeries) {
-            streamList.add(displayStream.name)
-        }
-
-        searchBox.setAdapter(
-            ArrayAdapter(
-                root.context,
-                android.R.layout.simple_spinner_item,
-                streamList
-            )
-        )
+    override fun onResume() {
+        setupView()
+        super.onResume()
     }
 
+    //Load Components
     private fun setSearchOnClick() {
-        search.setOnClickListener {
-            val matches = streamContainer.allSeries?.filter {
-                it.name.contains(
-                    searchBox.text.toString(),
-                    true
-                )
-            }.take(100)
+        searchBox.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                //nothing
+            }
 
-            searchList.removeAllViews()
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                val matches = MainActivity.getAllAnime().filter {
+                    it.title.contains(
+                        searchBox.text.toString(),
+                        true
+                    )
+                }.take(100)
 
-            searchList.adapter = StreamAdapterRecycler(requireContext(), matches)
-        }
+                searchList.removeAllViews()
+
+                searchList.adapter = StreamAdapterRecycler(root.context, matches)
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                //Nothing
+            }
+
+        })
+    }
+
+    private fun setupView(){
+        activity?.findViewById<ImageButton>(R.id.menu_button)?.visibility = View.GONE
+
+        activity?.findViewById<TextView>(R.id.app_title)?.visibility = View.GONE
+
+        searchBox = activity?.findViewById(R.id.searchbox)!!
+
+        searchBox.visibility = View.VISIBLE
+
+        searchBox.requestFocus()
+
+        val imm: InputMethodManager? =
+            activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+        imm?.showSoftInput(searchBox, InputMethodManager.SHOW_IMPLICIT)
     }
 }

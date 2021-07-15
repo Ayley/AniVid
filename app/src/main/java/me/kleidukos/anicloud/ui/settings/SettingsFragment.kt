@@ -1,23 +1,18 @@
 package me.kleidukos.anicloud.ui.settings
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.databinding.FragmentSettingsBinding
-import me.kleidukos.anicloud.datachannel.DataChannelManager
-import me.kleidukos.anicloud.room.User
+import me.kleidukos.anicloud.ui.main.MainActivity
+import me.kleidukos.anicloud.room.user.User
 import java.lang.Exception
 import kotlin.streams.toList
 
@@ -46,15 +41,7 @@ class SettingsFragment : Fragment() {
         loginPassword = root.findViewById(R.id.login_password)
         login = root.findViewById(R.id.login)
 
-        try {
-            user = DataChannelManager.dataChannelStorage("StreamView") as User
-            loginContent.visibility = View.GONE
-            loggedContent.visibility = View.VISIBLE
-        } catch (e: Exception) {
-            //Nothing
-        }
-
-        if (user == null) {
+        if (!MainActivity.database().userDao().isExists()) {
             login.setOnClickListener {
                 val email = loginEmail.text
                 val password = loginPassword.text
@@ -81,7 +68,8 @@ class SettingsFragment : Fragment() {
                                             val sessionId: String = regex.find(cockie)?.groups?.get(1)?.value!!
 
                                             if (sessionId != null) {
-                                                DataChannelManager.sendMainChannelData(sessionId)
+                                                val user = User(0, sessionId)
+                                                MainActivity.database().userDao().insertUser(user)
                                             }
 
                                             loginContent.visibility = View.GONE
@@ -97,6 +85,9 @@ class SettingsFragment : Fragment() {
                     }
                 }
             }
+        }else{
+            loginContent.visibility = View.GONE
+            loggedContent.visibility = View.VISIBLE
         }
 
         return root

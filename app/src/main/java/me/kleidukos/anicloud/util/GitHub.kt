@@ -6,7 +6,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.result.Result
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import me.kleidukos.anicloud.models.GithubRelease
+import me.kleidukos.anicloud.models.github.GithubRelease
 
 class GitHub {
 

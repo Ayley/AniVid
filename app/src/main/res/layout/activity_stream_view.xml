@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/background"
+    android:background="@color/background2"
     tools:context=".ui.stream.StreamView">
 
     <LinearLayout
@@ -13,7 +13,7 @@
         android:layout_height="60dp"
         android:orientation="horizontal"
         android:layout_alignParentTop="true"
-        android:background="@color/accent_darkest">
+        android:background="@color/two_white">
 
         <ImageButton
             android:id="@+id/back"
@@ -48,12 +48,12 @@
         <androidx.cardview.widget.CardView
             android:layout_width="128dp"
             android:layout_height="177dp"
-            app:cardCornerRadius="10dp">
+            app:cardCornerRadius="8dp"
+            android:background="@color/two_white">
             <ImageView
                 android:id="@+id/stream_thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@color/black"
                 android:scaleType="centerCrop"/>
         </androidx.cardview.widget.CardView>
 
@@ -100,6 +100,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/season_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"/>
     </LinearLayout>
 </RelativeLayout>

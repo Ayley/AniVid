@@ -10,11 +10,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.activities.MainActivity
+import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.adapter.StreamAdapterRecycler
-import me.kleidukos.anicloud.enums.Genre
-import me.kleidukos.anicloud.models.DisplayStream
-import me.kleidukos.anicloud.room.RoomGenre
+import me.kleidukos.anicloud.models.anicloud.Genre
+import me.kleidukos.anicloud.room.series.RoomDisplayStream
+import me.kleidukos.anicloud.room.savedgenres.RoomGenre
 
 class SeriesContainer: LinearLayout {
 
@@ -37,7 +37,7 @@ class SeriesContainer: LinearLayout {
         linearLayout: LinearLayout,
         genre: Genre?,
         genreSelector: GenreSelector?,
-        displayStreams: List<DisplayStream>,
+        displayStreams: List<RoomDisplayStream>,
         title: String,
         canRemoved: Boolean
     ) : super(context) {
@@ -56,7 +56,7 @@ class SeriesContainer: LinearLayout {
     }
 
     //Load components
-    private fun loadRemoveButton(canRemoved: Boolean,genre: Genre?, genreSelector: GenreSelector?, linearLayout: LinearLayout) {
+    private fun loadRemoveButton(canRemoved: Boolean, genre: Genre?, genreSelector: GenreSelector?, linearLayout: LinearLayout) {
         if (!canRemoved) {
             removeButton.visibility = View.GONE
         } else {
@@ -75,26 +75,15 @@ class SeriesContainer: LinearLayout {
     private fun loadTitle(title: String) {
         if (title.isBlank()) {
             containerName.visibility = View.GONE
-
-            setTopMargin(context)
         } else {
             containerName.text = title
         }
     }
 
-    private fun createContainer(displayStreams: List<DisplayStream>) {
+    private fun createContainer(displayStreams: List<RoomDisplayStream>) {
         containerList.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         containerList.adapter = StreamAdapterRecycler(context, displayStreams)
-    }
-
-    //Load layout
-    private fun setTopMargin(context: Context) {
-        val params = containerList.layoutParams as LayoutParams
-
-        params.topMargin = (5 / context.resources.displayMetrics.density).toInt()
-
-        containerList.layoutParams = params
     }
 
     //functions

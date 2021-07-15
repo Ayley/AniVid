@@ -8,21 +8,21 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.circularreveal.CircularRevealHelper
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.activities.MainActivity
-import me.kleidukos.anicloud.models.DisplayStream
-import me.kleidukos.anicloud.models.Season
-import me.kleidukos.anicloud.models.Stream
-import me.kleidukos.anicloud.room.RoomDisplayStream
-import me.kleidukos.anicloud.scraping.SeasonFetcher
-import me.kleidukos.anicloud.scraping.StreamFetcher
+import me.kleidukos.anicloud.ui.main.MainActivity
+import me.kleidukos.anicloud.room.series.RoomDisplayStream
+import me.kleidukos.anicloud.room.watchlist.RoomWatchlist
 import me.kleidukos.anicloud.ui.stream.StreamView
-import java.lang.Exception
 
-class StreamAdapterRecycler( private val context: Context,private val displayStreams: List<DisplayStream>) : RecyclerView.Adapter<StreamAdapterRecycler.Holder>() {
+
+class StreamAdapterRecycler(
+    private val context: Context,
+    private val displayStreams: List<RoomDisplayStream>
+) : RecyclerView.Adapter<StreamAdapterRecycler.Holder>() {
 
     class Holder(view: View) : RecyclerView.ViewHolder(view) {
         val textView: TextView = view.findViewById(R.id.card_title)
@@ -36,7 +36,7 @@ class StreamAdapterRecycler( private val context: Context,private val displayStr
 
         val params: RecyclerView.LayoutParams = view.layoutParams as RecyclerView.LayoutParams
 
-        val width = (context.resources.displayMetrics.widthPixels / 3) - 15
+        val width = (context.resources.displayMetrics.widthPixels / 3) - 16
 
         params.width = width
 
@@ -46,43 +46,57 @@ class StreamAdapterRecycler( private val context: Context,private val displayStr
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        val displayStream: DisplayStream = displayStreams[position]
+        try {
+            val displayStream: RoomDisplayStream = displayStreams[position]
 
-        var name: String = displayStream.name
-
-        holder.textView.text = name
-        Picasso.get().load(displayStream.cover).into(holder.imageView)
-
-        val watchlistDao = MainActivity.database().watchlistDao().getWatchlist()
-
-        val id = watchlistDao.size
-
-        val roomDisplayStream = if (id == 0) {
-            RoomDisplayStream(0, displayStream.name, displayStream.cover, displayStream.url)
-        } else {
-            RoomDisplayStream(id, displayStream.name, displayStream.cover, displayStream.url)
-        }
-
-        holder.itemView.setOnClickListener {
-
-            val contains: Boolean =
-                watchlistDao.none { it.name.contains(displayStream.name, true) }
-
-            if(contains){
-                MainActivity.database().watchlistDao().insertWatchlist(roomDisplayStream)
+            holder.textView.text = displayStream.title
+            if (displayStream.poster != null) {
+                Picasso.get().load(displayStream.poster).into(holder.imageView)
+            }else{
+                holder.imageView.visibility = View.GONE
             }
 
-            GlobalScope.launch(Dispatchers.Main) {
-                var stream: Stream? = StreamFetcher.loadStream(
+            val watchlistDao = MainActivity.database().watchlistDao().getWatchlist()
+
+            val id = watchlistDao.size
+
+            val roomWatchlist = if (id == 0) {
+                RoomWatchlist(
+                    0,
+                    displayStream.title,
+                    displayStream.poster ?: "",
                     displayStream.url,
-                    displayStream.name,
-                    displayStream.cover
+                    displayStream.genres
                 )
-
-                val intent = Intent(context, StreamView::class.java).putExtra("stream", stream)
-
-                context.startActivity(intent)
+            } else {
+                RoomWatchlist(
+                    id,
+                    displayStream.title,
+                    displayStream.poster ?: "",
+                    displayStream.url,
+                    displayStream.genres
+                )
             }
+
+            holder.itemView.setOnClickListener {
+
+                val contains: Boolean =
+                    watchlistDao.none { it.name.contains(displayStream.title, true) }
+
+                if (contains) {
+                    MainActivity.database().watchlistDao().insertWatchlist(roomWatchlist)
+                }
+
+                GlobalScope.launch(Dispatchers.Main) {
+
+
+                    val intent = Intent(context, StreamView::class.java).putExtra("title", displayStream.title).putExtra("display", displayStream)
+                    context.startActivity(intent)
+
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 

@@ -7,25 +7,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
-import me.kleidukos.anicloud.R
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import me.kleidukos.anicloud.enums.Language
-import me.kleidukos.anicloud.models.Episode
-import me.kleidukos.anicloud.models.Season
-import me.kleidukos.anicloud.models.Stream
+import me.kleidukos.anicloud.R
+import me.kleidukos.anicloud.models.anicloud.Episode
+import me.kleidukos.anicloud.models.anicloud.Language
+import me.kleidukos.anicloud.models.anicloud.Stream
 import me.kleidukos.anicloud.ui.videoplayer.StreamPlayer
 
-class SeasonAdapterRecycler(private val context: Context, private val season: Season,private val  stream: Stream) :
+class SeasonAdapterRecycler(
+    private val context: Context,
+    private val episodes: List<Episode>,
+    private val stream: Stream
+) :
     RecyclerView.Adapter<SeasonAdapterRecycler.Holder>() {
 
     class Holder(view: View) : RecyclerView.ViewHolder(view) {
+        val episode = view.findViewById<RelativeLayout>(R.id.episode)
+        val thumbnail: ImageView = view.findViewById(R.id.episode_thumbnail)
         val title: TextView = view.findViewById(R.id.episode_title)
         val description: TextView = view.findViewById(R.id.episode_description)
         val languageContent: RelativeLayout = view.findViewById(R.id.language_selection)
@@ -43,9 +50,9 @@ class SeasonAdapterRecycler(private val context: Context, private val season: Se
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        val episode: Episode = season.episodes[position]
+        val episode: Episode = episodes[position]
 
-        val sdk_version = android.os.Build.VERSION.SDK_INT;
+        val sdk_version = android.os.Build.VERSION.SDK_INT
         if(episode.seen) {
             if (sdk_version < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                 holder.itemView.setBackgroundDrawable(
@@ -88,69 +95,102 @@ class SeasonAdapterRecycler(private val context: Context, private val season: Se
             }
         }
 
-        Log.d("Epsisode", episode.titleGerman + " " + episode.titleEnglish + " " + position + " " + episode.seen)
-
-        GlobalScope.launch(Dispatchers.Unconfined) {
-            withContext(Dispatchers.Main) {
-                var name: String? = null
-
-                if(episode.titleGerman?.isNotEmpty()!!){
-                    name = episode.titleGerman
-                }else if (episode.titleEnglish?.isNotEmpty()!!){
-                    name = episode.titleEnglish
-                }
-
-                val description = episode.description
-
-                holder.title.text = name
-                holder.description.text = description
-            }
+        if (episode.poster != null && episode.poster.isNotEmpty()) {
+            Picasso.get().load(episode.poster).into(holder.thumbnail)
+        } else {
+            holder.thumbnail.visibility = View.GONE
+            holder.itemView.findViewById<CardView>(R.id.episode_card).visibility = View.GONE
         }
 
-        if(episode.hoster.isNotEmpty()){
-            if(episode.hoster.first().streams.containsKey(Language.GERMAN)){
+        GlobalScope.launch(Dispatchers.Main) {
+
+            var name: String? = if (episode.titleGerman?.isNotEmpty()!!) {
+                episode.titleGerman
+            } else {
+                episode.titleEnglish
+            }
+
+            val description = episode.description
+
+            holder.title.text = name
+            holder.description.text = description
+        }
+
+        Log.d("StreamView", episode.season.toString())
+
+        if (episode.providers.isNotEmpty()) {
+            if (containsProvider(Language.GERMAN, episode)) {
                 holder.german.visibility = View.VISIBLE
             }
 
-            if(episode.hoster.first().streams.containsKey(Language.JAPANESE_GERMAN)){
+            if (containsProvider(Language.JAPANESE_GERMAN, episode)) {
                 holder.japaneseGerman.visibility = View.VISIBLE
             }
 
-            if(episode.hoster.first().streams.containsKey(Language.JAPANESE_ENGLISH)){
+
+            if (containsProvider(Language.JAPANESE_ENGLISH, episode)) {
                 holder.japaneseEnglish.visibility = View.VISIBLE
             }
 
             holder.german.setOnClickListener {
-                openVideoPlayerWithLanguage(stream, Language.GERMAN, position)
+                openVideoPlayerWithLanguage(stream.title, Language.GERMAN, position, episode.season)
             }
 
             holder.japaneseGerman.setOnClickListener {
-                openVideoPlayerWithLanguage(stream, Language.JAPANESE_GERMAN, position)
+                openVideoPlayerWithLanguage(
+                    stream.title,
+                    Language.JAPANESE_GERMAN,
+                    position,
+                    episode.season
+                )
             }
 
             holder.japaneseEnglish.setOnClickListener {
-                openVideoPlayerWithLanguage(stream, Language.JAPANESE_ENGLISH, position)
+                openVideoPlayerWithLanguage(
+                    stream.title,
+                    Language.JAPANESE_ENGLISH,
+                    position,
+                    episode.season
+                )
             }
         }else{
 
         }
 
         holder.itemView.setOnClickListener {
-            if(holder.languageContent.visibility == View.GONE){
+            if (holder.languageContent.visibility == View.GONE) {
+                holder.episode.visibility = View.GONE
                 holder.languageContent.visibility = View.VISIBLE
-            }else{
+            } else {
+                holder.episode.visibility = View.VISIBLE
                 holder.languageContent.visibility = View.GONE
             }
         }
     }
 
-    private fun openVideoPlayerWithLanguage(stream: Stream, language: Language, episode: Int){
-        val intent = Intent(context, StreamPlayer::class.java).putExtra("season", season).putExtra("episode", episode).putExtra("language", language).putExtra("stream", stream).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    fun containsProvider(language: Language, episode: Episode): Boolean {
+        for (provider in episode.providers) {
+            if (provider.language == language) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private fun openVideoPlayerWithLanguage(
+        stream: String,
+        language: Language,
+        episode: Int,
+        season: Int
+    ) {
+        val intent = Intent(context, StreamPlayer::class.java).putExtra("episode", episode)
+            .putExtra("language", language).putExtra("stream", stream).putExtra("season", season)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         context.startActivity(intent)
     }
 
     override fun getItemCount(): Int {
-        return season.episodes.size
+        return episodes.size
     }
 }
