@@ -73,7 +73,7 @@ class DownloadManager(val url: String, val activity: AppCompatActivity) {
                     install.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     install.setDataAndType(
                         uri,
-                        "\"application/vnd.android.package-archive\""
+                        "application/vnd.android.package-archive"
                     )
                     activity.startActivity(install)
 

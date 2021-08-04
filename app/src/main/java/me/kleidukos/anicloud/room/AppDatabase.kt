@@ -13,8 +13,8 @@ import me.kleidukos.anicloud.room.user.UserDao
 import me.kleidukos.anicloud.room.watchlist.RoomWatchlist
 import me.kleidukos.anicloud.room.watchlist.WatchlistDao
 
-@Database(entities = [User::class, RoomDisplayStream::class, RoomGenre::class, RoomWatchlist::class], version = 8)
 @TypeConverters(GenreListConverter::class)
+@Database(entities = [User::class, RoomDisplayStream::class, RoomGenre::class, RoomWatchlist::class], version = 11)
 abstract class AppDatabase: RoomDatabase() {
 
     abstract fun userDao(): UserDao

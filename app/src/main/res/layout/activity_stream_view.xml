@@ -60,29 +60,14 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <com.ms.square.android.expandabletextview.ExpandableTextView
-                xmlns:expandableTextView="http://schemas.android.com/apk/res-auto"
+            <TextView
                 android:id="@+id/stream_description"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                expandableTextView:maxCollapsedLines="7"
-                expandableTextView:animDuration="200">
-                <TextView
-                    android:id="@id/expandable_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/white" />
-                <ImageButton
-                    android:id="@id/expand_collapse"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:layout_gravity="right|bottom"
-                    android:background="@android:color/transparent"/>
-            </com.ms.square.android.expandabletextview.ExpandableTextView>
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:textSize="16sp"
+                android:textColor="@color/white" />
         </ScrollView>
     </LinearLayout>
 

@@ -7,18 +7,14 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.*
 import me.kleidukos.anicloud.R
 import me.kleidukos.anicloud.ui.main.MainActivity
-import me.kleidukos.anicloud.models.anicloud.DisplayStream
 import me.kleidukos.anicloud.room.AppDatabase
 import me.kleidukos.anicloud.room.series.RoomDisplayStream
+import me.kleidukos.anicloud.scraping.AnimeScraper
 import me.kleidukos.anicloud.util.DownloadManager
-import me.kleidukos.anicloud.util.EndPoint
 import me.kleidukos.anicloud.util.GitHub
-import me.kleidukos.anicloud.util.StringUtil
 import java.util.*
 
 class SplashScreenActivity : AppCompatActivity() {
@@ -57,36 +53,16 @@ class SplashScreenActivity : AppCompatActivity() {
             title.text = "Loading animes"
         }
 
-        val database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "AniCloud")
-            .allowMainThreadQueries().fallbackToDestructiveMigration().build()
+        val database = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "AniCloud").allowMainThreadQueries().fallbackToDestructiveMigration().build()
         val db = database.seriesDao()
         db.clear()
 
-        val type = object : TypeToken<List<DisplayStream>>() {}.type
-        val streams: MutableList<DisplayStream> = mutableListOf()
-
-        try {
-            streams.addAll(
-                Gson().fromJson<List<DisplayStream>>(
-                    EndPoint.getAll(),
-                    type
-                )
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val streams = AnimeScraper.scrapAll()
 
         for (stream in streams) {
-            val room = RoomDisplayStream(
-                StringUtil.serialize(stream.title),
-                stream.poster,
-                stream.url,
-                stream.genres
-            )
+            Log.d("SaveStream", stream.title)
 
-            Log.d("SaveStream", StringUtil.serialize(stream.title))
-
-            db.insertDisplayStreams(room)
+            db.insertDisplayStreams(RoomDisplayStream(stream.title, stream.altTitle, stream.year, stream.url, stream.description, "", null))
         }
     }
 
@@ -101,16 +77,18 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun update() {
         val update = GitHub.getUpdate(this@SplashScreenActivity)
+        val link = update.second.split(";")[0]
+        val description = update.second.split(";")[1] ?: ""
         if (update.first) {
             runOnUiThread {
                 MaterialAlertDialogBuilder(this@SplashScreenActivity)
-                    .setTitle("Neues Update")
-                    .setMessage("https://github.com/Ayley/AniVid | Patches")
+                    .setTitle("New update")
+                    .setMessage(description)
                     .setNeutralButton("Later") { _, _ ->
                         init()
                     }
-                    .setPositiveButton("Just") { _, _ ->
-                        val downloadManager = DownloadManager(update.second, this)
+                    .setPositiveButton("Now") { _, _ ->
+                        val downloadManager = DownloadManager(link, this)
                         downloadManager.startDownload()
                     }.show()
             }

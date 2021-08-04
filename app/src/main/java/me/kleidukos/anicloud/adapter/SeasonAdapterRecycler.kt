@@ -2,7 +2,6 @@ package me.kleidukos.anicloud.adapter
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,13 +19,14 @@ import kotlinx.coroutines.launch
 import me.kleidukos.anicloud.R
 import me.kleidukos.anicloud.models.anicloud.Episode
 import me.kleidukos.anicloud.models.anicloud.Language
-import me.kleidukos.anicloud.models.anicloud.Stream
-import me.kleidukos.anicloud.ui.videoplayer.StreamPlayer
+import me.kleidukos.anicloud.models.anicloud.SimpleStream
+import me.kleidukos.anicloud.room.series.RoomDisplayStream
+import me.kleidukos.anicloud.ui.videoplayer.StreamVideoPlayer
 
 class SeasonAdapterRecycler(
     private val context: Context,
     private val episodes: List<Episode>,
-    private val stream: Stream
+    private val stream: SimpleStream
 ) :
     RecyclerView.Adapter<SeasonAdapterRecycler.Holder>() {
 
@@ -50,8 +50,7 @@ class SeasonAdapterRecycler(
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        val episode: Episode = episodes[position]
-
+        val episode = episodes[position]
         val sdk_version = android.os.Build.VERSION.SDK_INT
         if(episode.seen) {
             if (sdk_version < android.os.Build.VERSION_CODES.JELLY_BEAN) {
@@ -104,10 +103,10 @@ class SeasonAdapterRecycler(
 
         GlobalScope.launch(Dispatchers.Main) {
 
-            var name: String? = if (episode.titleGerman?.isNotEmpty()!!) {
-                episode.titleGerman
+            var name: String? = if (episode.title_german?.isNotEmpty()!!) {
+                episode.title_german
             } else {
-                episode.titleEnglish
+                episode.title_english
             }
 
             val description = episode.description
@@ -116,40 +115,46 @@ class SeasonAdapterRecycler(
             holder.description.text = description
         }
 
-        Log.d("StreamView", episode.season.toString())
-
-        if (episode.providers.isNotEmpty()) {
-            if (containsProvider(Language.GERMAN, episode)) {
+        if (episode.languages != null && episode.languages.isNotEmpty()) {
+            if (episode.languages.contains(Language.GERMAN)) {
                 holder.german.visibility = View.VISIBLE
+            }else{
+                holder.german.visibility = View.GONE
             }
 
-            if (containsProvider(Language.JAPANESE_GERMAN, episode)) {
+            if (episode.languages.contains(Language.JAPANESE_GERMAN)) {
                 holder.japaneseGerman.visibility = View.VISIBLE
+            }else{
+                holder.japaneseGerman.visibility = View.GONE
             }
 
 
-            if (containsProvider(Language.JAPANESE_ENGLISH, episode)) {
+            if (episode.languages.contains(Language.JAPANESE_ENGLISH)) {
                 holder.japaneseEnglish.visibility = View.VISIBLE
+            }else{
+                holder.japaneseEnglish.visibility = View.GONE
             }
 
             holder.german.setOnClickListener {
-                openVideoPlayerWithLanguage(stream.title, Language.GERMAN, position, episode.season)
+                openVideoPlayerWithLanguage(
+                    episode,
+                    Language.GERMAN,
+                    episode.season
+                )
             }
 
             holder.japaneseGerman.setOnClickListener {
                 openVideoPlayerWithLanguage(
-                    stream.title,
+                    episode,
                     Language.JAPANESE_GERMAN,
-                    position,
                     episode.season
                 )
             }
 
             holder.japaneseEnglish.setOnClickListener {
                 openVideoPlayerWithLanguage(
-                    stream.title,
+                    episode,
                     Language.JAPANESE_ENGLISH,
-                    position,
                     episode.season
                 )
             }
@@ -168,23 +173,16 @@ class SeasonAdapterRecycler(
         }
     }
 
-    fun containsProvider(language: Language, episode: Episode): Boolean {
-        for (provider in episode.providers) {
-            if (provider.language == language) {
-                return true
-            }
-        }
-        return false
-    }
-
     private fun openVideoPlayerWithLanguage(
-        stream: String,
+        episode: Episode,
         language: Language,
-        episode: Int,
         season: Int
     ) {
-        val intent = Intent(context, StreamPlayer::class.java).putExtra("episode", episode)
-            .putExtra("language", language).putExtra("stream", stream).putExtra("season", season)
+        val intent = Intent(context, StreamVideoPlayer::class.java)
+            .putExtra("stream", stream.title)
+            .putExtra("episode", episode)
+            .putExtra("season", season)
+            .putExtra("language", language)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         context.startActivity(intent)

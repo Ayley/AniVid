@@ -93,7 +93,6 @@ class SeriesContainer: LinearLayout {
         for (roomGenre in genresDao){
             if(roomGenre.genre == genre){
                 return roomGenre
-                break
             }
         }
         return null

@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.core.view.isEmpty
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.*
 import me.kleidukos.anicloud.R
 import me.kleidukos.anicloud.ui.main.MainActivity
@@ -21,6 +20,7 @@ import me.kleidukos.anicloud.components.RandomSeries
 import me.kleidukos.anicloud.components.SeriesContainer
 import me.kleidukos.anicloud.models.anicloud.Genre
 import me.kleidukos.anicloud.room.series.RoomDisplayStream
+import me.kleidukos.anicloud.util.EndPoint
 
 class HomeFragment : Fragment() {
 
@@ -98,7 +98,7 @@ class HomeFragment : Fragment() {
         watchlist.clear()
 
         for (stream in dbWatchlist.getWatchlist()){
-            val displayStream = RoomDisplayStream(stream.name, stream.cover, stream.url, stream.genre)
+            val displayStream = EndPoint.getSimpleStream(stream.name)
             watchlist.add(displayStream)
         }
     }
@@ -146,7 +146,7 @@ class HomeFragment : Fragment() {
         GlobalScope.launch(Dispatchers.Default){
             var removable = true
 
-            val streams: List<RoomDisplayStream> = if(genre == Genre.NEW){
+            val streams: List<RoomDisplayStream>? = if(genre == Genre.NEW){
                 removable = false
                 MainActivity.getNewAnime()
             }else if(genre == Genre.POPULAR){
@@ -154,6 +154,10 @@ class HomeFragment : Fragment() {
                 MainActivity.getPupularAnime()
             }else{
                 MainActivity.getAllAnime().filter { it.genres?.contains(genre)!! }
+            }
+
+            if(streams == null){
+                return@launch
             }
 
             val genreStreams = if (streams.size!! > 30) {

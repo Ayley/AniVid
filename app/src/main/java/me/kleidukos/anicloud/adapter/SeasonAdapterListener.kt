@@ -13,21 +13,21 @@ class SeasonAdapterListener(private val streamView: StreamView) :
 
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-        val seasonName = streamView.stream.seasons[pos].name
+        val season = streamView.seasonList[pos]
         streamView.container.removeAllViews()
 
-        Log.d("Stream", seasonName)
+        Log.d("Stream", season.title)
 
         streamView.scope = GlobalScope.launch(Dispatchers.Default) {
-            if (!streamView.seasonsMap.containsKey(seasonName))
+            if (!streamView.seasonsMap.containsKey(season.season))
                 streamView.loadSeason(pos)
 
 
             streamView.runOnUiThread {
                 streamView.container.adapter = SeasonAdapterRecycler(
                     streamView.applicationContext,
-                    streamView.seasonsMap.get(seasonName)!!,
-                    streamView.stream
+                    streamView.seasonsMap[season.season]!!,
+                    streamView.displayStream
                 )
             }
         }
@@ -38,8 +38,8 @@ class SeasonAdapterListener(private val streamView: StreamView) :
         streamView.runOnUiThread {
             streamView.container.adapter = SeasonAdapterRecycler(
                 streamView.applicationContext,
-                streamView.seasonsMap.toList().first().second,
-                streamView.stream
+                streamView.seasonsMap[streamView.seasonList[streamView.seasons.selectedItemPosition].season]!!,
+                streamView.displayStream
             )
         }
     }

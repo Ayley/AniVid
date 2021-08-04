@@ -1,13 +1,17 @@
 package me.kleidukos.anicloud.models.anicloud
 
+import java.io.Serializable
+
 data class Episode(
     val season: Int,
     val episode: Int,
-    val url: String,
-    val titleGerman: String?,
-    val titleEnglish: String,
-    val poster: String?,
+    val title_english: String,
+    val title_german: String?,
+    val episode_url: String,
     val description: String?,
-    val seen: Boolean,
-    val providers: List<Redirect>
-)
+    val poster: String?,
+    val languages: List<Language>?,
+    val seen: Boolean
+) : Serializable {
+
+}

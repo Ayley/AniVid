@@ -7,6 +7,7 @@
     <color name="seven_white">#70FFFFFF</color>
     <color name="two_white">#05FFFFFF</color>
     <color name="two_background">#1C1C1C</color>
+    <color name="player_control_background">#45121212</color>
 
     <!--AniCloud Colors-->
     <color name="background">#121C22</color>

@@ -8,8 +8,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Spinner
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.models.anicloud.Genre
+import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.room.savedgenres.RoomGenre
 import me.kleidukos.anicloud.ui.home.HomeFragment
 

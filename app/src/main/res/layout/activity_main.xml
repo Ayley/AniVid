@@ -42,18 +42,20 @@
             android:textColorHint="@color/white" />
         <ImageButton
             android:id="@+id/search_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/search_symbol"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="10dp"
             android:layout_gravity="right|center_vertical"
+            android:scaleType="centerInside"
             android:background="@android:color/transparent" />
         <ImageButton
             android:id="@+id/menu_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/menu_button"
             android:layout_marginRight="5dp"
+            android:scaleType="centerInside"
             android:layout_gravity="right|center_vertical"
             android:background="@android:color/transparent"/>
     </LinearLayout>

@@ -5,13 +5,15 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import me.kleidukos.anicloud.models.anicloud.Genre
 import java.io.Serializable
+import java.util.List
 
 @Entity
 data class RoomDisplayStream(
-    @ColumnInfo(name = "name") val title: String,
-    @ColumnInfo(name = "cover") val poster: String?,
+    @PrimaryKey val title: String,
+    @ColumnInfo(name = "altName") val altTitle: String?,
+    @ColumnInfo(name = "year") val year: String,
     @ColumnInfo(name = "url") val url: String,
-    @ColumnInfo(name = "genres") val genres: List<Genre>
-): Serializable{
-    @PrimaryKey(autoGenerate = true) var uId: Int = 0
-}
+    @ColumnInfo(name = "description") val description: String?,
+    @ColumnInfo(name = "poster") val poster: String,
+    @ColumnInfo(name = "genres") val genres: List<Genre>?
+): Serializable{}

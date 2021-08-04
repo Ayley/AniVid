@@ -13,10 +13,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.room.series.RoomDisplayStream
 import me.kleidukos.anicloud.room.watchlist.RoomWatchlist
+import me.kleidukos.anicloud.tmdb.TMDB
+import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.ui.stream.StreamView
+import me.kleidukos.anicloud.util.StreamConverter
 
 
 class StreamAdapterRecycler(
@@ -47,36 +49,21 @@ class StreamAdapterRecycler(
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
         try {
-            val displayStream: RoomDisplayStream = displayStreams[position]
+            val displayStream = StreamConverter.convert(displayStreams[position])
 
             holder.textView.text = displayStream.title
-            if (displayStream.poster != null) {
-                Picasso.get().load(displayStream.poster).into(holder.imageView)
-            }else{
-                holder.imageView.visibility = View.GONE
-            }
+
+            displayStream.setData(holder.imageView, null)
 
             val watchlistDao = MainActivity.database().watchlistDao().getWatchlist()
 
             val id = watchlistDao.size
 
-            val roomWatchlist = if (id == 0) {
-                RoomWatchlist(
-                    0,
-                    displayStream.title,
-                    displayStream.poster ?: "",
-                    displayStream.url,
-                    displayStream.genres
-                )
-            } else {
-                RoomWatchlist(
-                    id,
-                    displayStream.title,
-                    displayStream.poster ?: "",
-                    displayStream.url,
-                    displayStream.genres
-                )
-            }
+            val roomWatchlist = RoomWatchlist(
+                id,
+                displayStream.title,
+                displayStream.poster
+            )
 
             holder.itemView.setOnClickListener {
 
@@ -90,7 +77,7 @@ class StreamAdapterRecycler(
                 GlobalScope.launch(Dispatchers.Main) {
 
 
-                    val intent = Intent(context, StreamView::class.java).putExtra("title", displayStream.title).putExtra("display", displayStream)
+                    val intent = Intent(context, StreamView::class.java).putExtra("title", displayStream.title)
                     context.startActivity(intent)
 
                 }

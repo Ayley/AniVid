@@ -7,6 +7,7 @@ import com.github.kittinunf.result.Result
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import me.kleidukos.anicloud.models.github.GithubRelease
+import java.lang.Exception
 
 class GitHub {
 
@@ -21,23 +22,27 @@ class GitHub {
 
             when(result.third){
                 is Result.Failure -> {
-                    return Pair(false, "")
+                    return Pair(false, ";")
                 }
                 is Result.Success -> {
-                    val release = Json { ignoreUnknownKeys = true; coerceInputValues = true}.decodeFromString<List<GithubRelease>>(result.third.get())[0]
+                    try {
+                        val release = Json { ignoreUnknownKeys = true; coerceInputValues = true}.decodeFromString<List<GithubRelease>>(result.third.get())[0]
 
-                    val githubReleaseVersion = release.tag_name.replace(".","").toInt()
+                        val githubReleaseVersion = release.tag_name.replace(".","").toInt()
 
-                    val currentVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName.replace(".", "").toInt()
+                        val currentVersion = context.packageManager.getPackageInfo(context.packageName, 0).versionName.replace(".", "").toInt()
 
-                    Log.d("GitHub_Update", "Github Version: $githubReleaseVersion | current version: $currentVersion")
+                        Log.d("GitHub_Update", "Github Version: $githubReleaseVersion | current version: $currentVersion")
 
-                    if(githubReleaseVersion > currentVersion){
-                        return Pair(true, release.assets.first().browser_download_url!!)
+                        if(githubReleaseVersion > currentVersion){
+                            return Pair(true, release.assets.first().browser_download_url!! + ";" + release.body)
+                        }
+                    }catch (e: Exception){
+                        return Pair(false, ";")
                     }
                 }
             }
-            return Pair(false, "")
+            return Pair(false, ";")
         }
     }
 }

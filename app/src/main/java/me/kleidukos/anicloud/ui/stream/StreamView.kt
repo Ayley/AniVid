@@ -1,7 +1,6 @@
 package me.kleidukos.anicloud.ui.stream
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,60 +12,76 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.kleidukos.anicloud.R
-import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.adapter.SeasonAdapterListener
 import me.kleidukos.anicloud.models.anicloud.Episode
-import me.kleidukos.anicloud.room.user.User
-import me.kleidukos.anicloud.models.anicloud.Stream
+import me.kleidukos.anicloud.models.anicloud.Season
+import me.kleidukos.anicloud.models.anicloud.SimpleStream
 import me.kleidukos.anicloud.room.series.RoomDisplayStream
+import me.kleidukos.anicloud.room.user.User
+import me.kleidukos.anicloud.tmdb.models.Result
+import me.kleidukos.anicloud.ui.main.MainActivity
 import me.kleidukos.anicloud.util.EndPoint
-import me.kleidukos.anicloud.util.StringUtil
+import me.kleidukos.anicloud.util.StreamConverter
 
 class StreamView : AppCompatActivity() {
 
+    lateinit var displayStream: SimpleStream
     lateinit var title: TextView
     lateinit var back: ImageButton
     lateinit var thumbnail: ImageView
-    lateinit var description: ExpandableTextView
+    lateinit var description: TextView
     lateinit var seasons: Spinner
     lateinit var container: RecyclerView
 
     lateinit var scope: Job
 
     var user: User? = null
-    lateinit var stream: Stream
-    var seasonsMap: MutableMap<String, List<Episode>> = mutableMapOf()
+    lateinit var seasonList: List<Season>
+    var seasonsMap: MutableMap<Int, List<Episode>> = mutableMapOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_stream_view)
 
+        setComponents()
+
+        setBackButtonClick()
+
+        val stream = EndPoint.getSimpleStream(intent.extras?.getString("title")!!)
+
+        displayStream = StreamConverter.convert(stream)
+
+        createUI()
+
+        user = MainActivity.database().userDao().getUser()
+
+        GlobalScope.launch(Dispatchers.Default) {
+            showSeason()
+        }
+    }
+
+    private fun setComponents(){
         title = findViewById(R.id.stream_title)
         back = findViewById(R.id.back)
         thumbnail = findViewById(R.id.stream_thumbnail)
         description = findViewById(R.id.stream_description)
         container = findViewById(R.id.season_container)
         seasons = findViewById(R.id.stream_season_selector)
+    }
 
-        container.layoutManager =
-            LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
-
-        val displayStream = intent.extras?.getSerializable("display") as RoomDisplayStream
-
-        title.text = displayStream.title
-
-        Picasso.get().load(displayStream.poster).into(thumbnail)
-
+    private fun setBackButtonClick(){
         back.setOnClickListener {
-            scope.cancel()
+            if (this::scope.isInitialized && scope != null) {
+                scope.cancel()
+            }
             finish()
         }
+    }
 
-        user = MainActivity.database().userDao().getUser()
+    private fun createUI(){
+        container.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
 
-        GlobalScope.launch(Dispatchers.Default) {
-            loadStream(displayStream.title)
-        }
+        displayStream.setData(thumbnail, description)
     }
 
     override fun onRestart() {
@@ -76,26 +91,30 @@ class StreamView : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        scope.cancel()
+        if (this::scope.isInitialized && scope != null) {
+            scope.cancel()
+        }
     }
 
     fun loadSeason(pos: Int) {
         user = MainActivity.database().userDao().getUser()
 
-        seasonsMap.put(stream.seasons[pos].name, stream.seasons[pos].episodes)
+        val episodes = EndPoint.getEpisodes(displayStream, seasonList[pos].season)
+
+        seasonsMap.put(seasonList[pos].season, episodes)
     }
 
-    private fun loadStream(title: String){
-        stream = EndPoint.getStream(title)
+    private fun showSeason() {
+        seasonList = displayStream.seasons
 
         runOnUiThread {
-            description.text = stream.description
+            description.text = displayStream.description
         }
 
         val seasonNames = mutableListOf<String>()
 
-        for (info in stream.seasons) {
-            seasonNames.add(info.name)
+        for (info in seasonList) {
+            seasonNames.add(info.title)
         }
 
         runOnUiThread {
@@ -106,10 +125,10 @@ class StreamView : AppCompatActivity() {
             )
         }
 
-        var index: Int = if (stream.seasons.size == 1) {
+        var index: Int = if (seasonList.size == 1) {
             0
         } else {
-            if (seasonNames.contains("Alle Filme")) {
+            if (seasonNames.contains("Filme")) {
                 1
             } else {
                 0

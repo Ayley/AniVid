@@ -3,6 +3,7 @@ package me.kleidukos.anicloud.ui.main
 import android.os.Build
 import android.os.Bundle
 import android.os.StrictMode
+import android.util.Log
 import android.view.MenuInflater
 import android.widget.ImageButton
 import android.widget.PopupMenu
@@ -11,6 +12,9 @@ import androidx.navigation.findNavController
 import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.kleidukos.anicloud.R
 import me.kleidukos.anicloud.room.AppDatabase
 import me.kleidukos.anicloud.room.series.RoomDisplayStream
@@ -25,8 +29,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private lateinit var database: AppDatabase
 
-        private var newList: MutableList<RoomDisplayStream> = mutableListOf()
-        private var popularList: MutableList<RoomDisplayStream> = mutableListOf()
+        private var newList: List<RoomDisplayStream>? = mutableListOf()
+        private var popularList: List<RoomDisplayStream>? = mutableListOf()
 
         fun database(): AppDatabase {
             return database
@@ -36,23 +40,16 @@ class MainActivity : AppCompatActivity() {
             return database.seriesDao().getDisplayStreams()
         }
 
-        fun getNewAnime(): List<RoomDisplayStream> {
-            if (newList.isEmpty()) {
-                val type = object : TypeToken<List<RoomDisplayStream>>() {}.type
-                newList.addAll(Gson().fromJson<List<RoomDisplayStream>>(EndPoint.getNew(), type))
+        fun getNewAnime(): List<RoomDisplayStream>? {
+            if (newList?.isEmpty() == true) {
+                newList = EndPoint.getNew()
             }
             return newList
         }
 
-        fun getPupularAnime(): List<RoomDisplayStream> {
-            if (popularList.isEmpty()) {
-                val type = object : TypeToken<List<RoomDisplayStream>>() {}.type
-                popularList.addAll(
-                    Gson().fromJson<List<RoomDisplayStream>>(
-                        EndPoint.getPopular(),
-                        type
-                    )
-                )
+        fun getPupularAnime(): List<RoomDisplayStream>? {
+            if (popularList?.isEmpty() == true) {
+                popularList = EndPoint.getPopular()
             }
             return popularList
         }
@@ -73,6 +70,24 @@ class MainActivity : AppCompatActivity() {
 
         loadDatabase()
     }
+
+    /*private var started = false
+    override fun onResume() {
+        super.onResume()
+        if(started){
+            GlobalScope.launch(Dispatchers.Default) {
+                val type = object : TypeToken<List<RoomDisplayStream>>() {}.type
+                val streams = Gson().fromJson<List<RoomDisplayStream>>(EndPoint.getAll(), type)
+
+                for (stream in streams){
+                    if(!database.seriesDao().contains(stream.sid)){
+                        database.seriesDao().insertDisplayStreams(stream)
+                    }
+                }
+            }
+        }
+        started = true
+    }*/
 
     private fun setupButtons() {
         searchButton.setOnClickListener {

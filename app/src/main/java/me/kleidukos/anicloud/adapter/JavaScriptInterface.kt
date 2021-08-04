@@ -2,10 +2,10 @@ package me.kleidukos.anicloud.adapter
 
 import android.util.Log
 import android.webkit.JavascriptInterface
-import me.kleidukos.anicloud.scraping.parsing.ProviderLinkFetcher
-import me.kleidukos.anicloud.ui.videoplayer.StreamPlayer
+import me.kleidukos.anicloud.scraping.ProviderLinkFetcher
+import me.kleidukos.anicloud.ui.videoplayer.StreamVideoPlayer
 
-class JavaScriptInterface(val hoster: String, val streamPlayer: StreamPlayer) {
+class JavaScriptInterface(val hoster: String, val streamVideoPlayer: StreamVideoPlayer) {
 
     var loaded = false
 
@@ -20,8 +20,8 @@ class JavaScriptInterface(val hoster: String, val streamPlayer: StreamPlayer) {
                 Log.d("MYSRC", src)
                     if (!loaded) {
                         loaded = true
-                        streamPlayer.runOnUiThread {
-                            streamPlayer.loadPlayer(src, true)
+                        streamVideoPlayer.runOnUiThread {
+                            streamVideoPlayer.loadVideo(src, 0, true)
                         }
                     }
             }
@@ -30,8 +30,8 @@ class JavaScriptInterface(val hoster: String, val streamPlayer: StreamPlayer) {
                 Log.d("MYSRC", src)
                     if (!loaded) {
                         loaded = true
-                        streamPlayer.runOnUiThread {
-                            streamPlayer.loadPlayer(src, true)
+                        streamVideoPlayer.runOnUiThread {
+                            streamVideoPlayer.loadVideo(src, 0, true)
                         }
                     }
             }
@@ -40,8 +40,8 @@ class JavaScriptInterface(val hoster: String, val streamPlayer: StreamPlayer) {
                 Log.d("MYSRC", src)
                     if (!loaded) {
                         loaded = true
-                        streamPlayer.runOnUiThread {
-                            streamPlayer.loadPlayer(src, true)
+                        streamVideoPlayer.runOnUiThread {
+                            streamVideoPlayer.loadVideo(src, 0, true)
                         }
                     }
             }

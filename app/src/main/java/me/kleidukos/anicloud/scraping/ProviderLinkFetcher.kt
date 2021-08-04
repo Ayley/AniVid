@@ -1,4 +1,4 @@
-package me.kleidukos.anicloud.scraping.parsing
+package me.kleidukos.anicloud.scraping
 
 import org.jsoup.Jsoup
 import java.net.URLDecoder
@@ -28,6 +28,14 @@ class ProviderLinkFetcher {
             val url = doc.getElementById("videolink") ?: return null
 
             return URLDecoder.decode("https:${url.text()}", "UTF-8")
+        }
+
+        fun ninjastream(html: String): String?{
+            val doc = Jsoup.parse(html)
+
+            val url = doc.selectFirst("video.jw-video").attr("src")
+
+            return url
         }
     }
 }
