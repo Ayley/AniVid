@@ -1,5 +1,7 @@
 package me.kleidukos.anicloud.tmdb;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.kleidukos.anicloud.tmdb.models.Episode;
@@ -10,6 +12,7 @@ import me.kleidukos.anicloud.ui.videoplayer.StreamVideoPlayer;
 import me.kleidukos.anicloud.util.JsoupBuilder;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -58,19 +61,33 @@ public class TMDB {
     }
 
     private static Result getTVSearch(String name, String altName, String year) {
-        String url = "https://api.themoviedb.org/3/search/tv?api_key=" + key + "&query=" + URLEncoder.encode(name) + "&language=de";
+        String url = null;
+        try {
+            url = "https://api.themoviedb.org/3/search/tv?api_key=" + key + "&query=" + URLEncoder.encode(name, StandardCharsets.UTF_8.name()) + "&language=de";
+            Log.d("TMDB", url);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         String result = getJson(url);
+
+        if(result == null || result.isEmpty()){
+            return null;
+        }
 
         Search search;
 
         try {
             search = mapper.readValue(result, Search.class);
 
-            List<Result> results = search.getResults().stream().filter(it -> it.getName().equalsIgnoreCase(name) || it.getName().equalsIgnoreCase(altName) && it.getFirst_air_date().contains(year)).collect(Collectors.toList());
+            List<Result> results = search.getResults().stream().filter(it -> (it.getName().contains(name) || it.getName().contains(altName)) && it.getFirst_air_date().contains(year)).collect(Collectors.toList());
 
-            if (results == null || results.size() == 0) {
-                return null;
+            if (results.size() == 0) {
+                if(search.getResults().size() > 0) {
+                    return search.getResults().get(0);
+                }else {
+                    return null;
+                }
             }
 
             return results.get(0);
@@ -81,21 +98,33 @@ public class TMDB {
     }
 
     private static Result getMovieSearch(String name, String altName, String year) {
-        String url = "https://api.themoviedb.org/3/search/movie?api_key=" + key + "&query=" + URLEncoder.encode(name) + "&language=de";
+        String url = null;
+        try {
+            url = "https://api.themoviedb.org/3/search/movie?api_key=" + key + "&query=" + URLEncoder.encode(name, StandardCharsets.UTF_8.name()) + "&language=de";
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         String result = getJson(url);
+
+        if(result == null || result.isEmpty()){
+            return null;
+        }
 
         Search search;
 
         try {
             search = mapper.readValue(result, Search.class);
 
-            List<Result> results = search.getResults().stream().filter(it -> it.getName().equalsIgnoreCase(name) || it.getName().equalsIgnoreCase(altName) && it.getFirst_air_date().contains(year)).collect(Collectors.toList());
+            List<Result> results = search.getResults().stream().filter(it -> (it.getName().contains(name) || it.getName().equalsIgnoreCase(altName)) && it.getFirst_air_date().contains(year)).collect(Collectors.toList());
 
-            if (results == null || results.size() == 0) {
-                return null;
+            if (results.size() == 0) {
+                if(search.getResults().size() > 0) {
+                    return search.getResults().get(0);
+                }else {
+                    return null;
+                }
             }
-
             return results.get(0);
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,7 +133,7 @@ public class TMDB {
     }
 
     private static String getJson(String urlString) {
-        String result = new String(JsoupBuilder.Companion.getDocument(urlString).body().text().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+        String result = new String(JsoupBuilder.Companion.getDocument(urlString, null).body().text().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         return result;
 
     }

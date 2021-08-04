@@ -16,7 +16,7 @@ import me.kleidukos.anicloud.util.JsoupBuilder;
 
 public class ProviderScraper {
     public static Map<Language, List<Provider>> scrapProviders(Episode episode) {
-        Document document = JsoupBuilder.Companion.getDocument("https://anicloud.io" + episode.getEpisode_url());
+        Document document = JsoupBuilder.Companion.getDocument("https://anicloud.io" + episode.getEpisode_url(), null);
 
         Elements elements = document.selectFirst("div.hosterSiteVideo > ul").select("li");
 

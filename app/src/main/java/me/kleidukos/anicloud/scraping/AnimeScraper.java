@@ -17,7 +17,7 @@ public class AnimeScraper {
 
     public static List<SimpleStream> scrapAll(){
 
-        Document document = JsoupBuilder.Companion.getDocument("https://anicloud.io/animes");
+        Document document = JsoupBuilder.Companion.getDocument("https://anicloud.io/animes", null);
 
         if(document == null){
             return null;

@@ -163,9 +163,10 @@ class StreamVideoPlayer : AppCompatActivity() {
         stream = StreamConverter.convert(s)
         episode = intent.extras?.getSerializable("episode")!! as Episode
         val seasonId = intent.extras?.getInt("season")!!
-        seasons = stream.seasons
+        stream.loadSeasons()
+        seasons = stream.seasons!!
         season = seasons.first { it.season == seasonId }
-        episodes = EndPoint.getEpisodes(stream, season.season)
+        episodes = EndPoint.getEpisodes(stream, season.season, null)
         selectedLanguage = intent.extras?.getSerializable("language") as Language
     }
 
@@ -286,7 +287,7 @@ class StreamVideoPlayer : AppCompatActivity() {
         if(episode.episode == episodes.last().episode){
             season = seasons.first{ it.season == season.season +1}
 
-            episodes = EndPoint.getEpisodes(stream, season.season)
+            episodes = EndPoint.getEpisodes(stream, season.season, null)
 
             episode = episodes.first()
         }else{
@@ -302,7 +303,7 @@ class StreamVideoPlayer : AppCompatActivity() {
         if(episode.episode == 1){
             season = seasons.first{ it.season == season.season -1}
 
-            episodes = EndPoint.getEpisodes(stream, season.season)
+            episodes = EndPoint.getEpisodes(stream, season.season, null)
 
             episode = episodes.last()
         }else{

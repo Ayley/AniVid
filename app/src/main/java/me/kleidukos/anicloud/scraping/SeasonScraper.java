@@ -16,7 +16,7 @@ public class SeasonScraper {
 
     public static List<Season> scrapSeasons(String url) {
 
-        Document document = JsoupBuilder.Companion.getDocument(url);
+        Document document = JsoupBuilder.Companion.getDocument(url, null);
 
         if(document == null){
             return null;

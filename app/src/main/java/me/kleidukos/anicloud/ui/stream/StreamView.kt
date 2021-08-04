@@ -56,6 +56,7 @@ class StreamView : AppCompatActivity() {
         user = MainActivity.database().userDao().getUser()
 
         GlobalScope.launch(Dispatchers.Default) {
+            displayStream.loadSeasons()
             showSeason()
         }
     }
@@ -82,6 +83,8 @@ class StreamView : AppCompatActivity() {
         container.layoutManager = LinearLayoutManager(applicationContext, LinearLayoutManager.VERTICAL, false)
 
         displayStream.setData(thumbnail, description)
+
+        title.text = displayStream.title
     }
 
     override fun onRestart() {
@@ -99,13 +102,13 @@ class StreamView : AppCompatActivity() {
     fun loadSeason(pos: Int) {
         user = MainActivity.database().userDao().getUser()
 
-        val episodes = EndPoint.getEpisodes(displayStream, seasonList[pos].season)
+        val episodes = EndPoint.getEpisodes(displayStream, seasonList[pos].season, user)
 
         seasonsMap.put(seasonList[pos].season, episodes)
     }
 
     private fun showSeason() {
-        seasonList = displayStream.seasons
+        seasonList = displayStream.seasons!!
 
         runOnUiThread {
             description.text = displayStream.description

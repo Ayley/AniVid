@@ -8,6 +8,7 @@ import me.kleidukos.anicloud.models.anicloud.Episode;
 import me.kleidukos.anicloud.models.anicloud.Language;
 import me.kleidukos.anicloud.models.anicloud.SimpleStream;
 import me.kleidukos.anicloud.room.series.RoomDisplayStream;
+import me.kleidukos.anicloud.room.user.User;
 import me.kleidukos.anicloud.tmdb.TMDB;
 import me.kleidukos.anicloud.util.JsoupBuilder;
 
@@ -16,9 +17,9 @@ import java.util.List;
 
 public class EpisodeScraper {
 
-    public static List<Episode> scrapEpisodes(String url, SimpleStream stream, int season) {
+    public static List<Episode> scrapEpisodes(String url, SimpleStream stream, int season, User user) {
 
-        Document document = JsoupBuilder.Companion.getDocument(buildSeasonUrl(url, season));
+        Document document = JsoupBuilder.Companion.getDocument(buildSeasonUrl(url, season), user);
 
         Elements elements = document.selectFirst("tbody#season" + season).select("tr");
 
@@ -39,6 +40,9 @@ public class EpisodeScraper {
 
             String poster = null;
 
+            boolean seen = element.hasClass("seen");
+            System.out.println(seen);
+
             if(episodeList != null){
                 description = episodeList.stream().filter(it -> it.getEpisode_number() == episode).findFirst().get().getOverview();
                 poster = episodeList.stream().filter(it -> it.getEpisode_number() == episode).findFirst().get().getPoster();
@@ -48,7 +52,7 @@ public class EpisodeScraper {
                 description = null;
             }
 
-            episodes.add(new Episode(season, episode, title_english, title_german, episodeUrl, description, poster, getLanguages(element), false));
+            episodes.add(new Episode(season, episode, title_english, title_german, episodeUrl, description, poster, getLanguages(element), seen));
         }
         return episodes;
     }
